@@ -22,7 +22,8 @@ from ..utils import log, F_OK, F_WARN, F_FAIL
 @option("--push", help="Push will sync the local directory to the cloudinary directory", is_flag=True)
 @option("--pull", help="Pull will sync the cloudinary directory to the local directory", is_flag=True)
 @option("-v", "--verbose", is_flag=True, help="Logs information after each upload")
-def sync(local_folder, cloudinary_folder, push, pull, verbose):
+@option("--expression", help="Search expression used to limit sync")
+def sync(local_folder, cloudinary_folder, push, pull, verbose, expression):
     if push == pull:
         print("Please use either the '--push' OR '--pull' options")
         exit(1)
@@ -41,6 +42,9 @@ def sync(local_folder, cloudinary_folder, push, pull, verbose):
         next_cursor = None
         items = {}
         while True:
+            search_expr = "folder:{}/*".format(folder)
+            if expression:
+                search_expr = "{0} AND {1}".format(search_expr, expression)
             res = Search().expression("folder:{}/*".format(folder)).next_cursor(next_cursor).with_field(
                 "image_analysis").max_results(500).execute()
             for item in res['resources']:
